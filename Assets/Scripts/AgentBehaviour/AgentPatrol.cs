@@ -13,6 +13,7 @@ public class AgentPatrol : MonoBehaviour
     [SerializeField] private bool loopPath;
     [SerializeField] private float minTargetDistance = 0.5f;
     [SerializeField] private float chaseSpeedMult = 1.5f;
+    [SerializeField] private float range = 20;
 
     [SerializeField] private GameObject taser;
     [SerializeField] private GiraffeBehaviour giraffe;
@@ -34,12 +35,14 @@ public class AgentPatrol : MonoBehaviour
 
     private void OnEnable()
     {
-        giraffe.isBad += ChaseGiraffe;
+        giraffe.IsBad += ChaseGiraffe;
+        giraffe.Tased += EndChase;
     }
 
     private void OnDisable()
     {
-        giraffe.isBad -= ChaseGiraffe;
+        giraffe.IsBad -= ChaseGiraffe;
+        giraffe.Tased -= EndChase;
     }
 
     // Start is called before the first frame update
@@ -63,17 +66,27 @@ public class AgentPatrol : MonoBehaviour
         }
     }
 
-    void ChaseGiraffe(bool state)
+    void ChaseGiraffe()
     {
-        chaseGiraffe = state;
-        taser.SetActive(state);
-        float mult = state ? chaseSpeedMult : 1;
-        agent.speed = defaultSpeed * mult;
-        agent.acceleration = defaultAcc * mult;
-        if (!state)
+        if ((transform.position - giraffe.transform.position).sqrMagnitude > range * range)
         {
-            agent.SetDestination(path[targetIndex].position);
+            return;
         }
+        
+        chaseGiraffe = true;
+        taser.SetActive(true);
+        agent.speed = defaultSpeed * chaseSpeedMult;
+        agent.acceleration = defaultAcc * chaseSpeedMult;
+    }
+
+    void EndChase()
+    {
+        chaseGiraffe = false;
+        taser.SetActive(false);
+        agent.speed = defaultSpeed;
+        agent.acceleration = defaultAcc;
+
+        agent.SetDestination(path[targetIndex].position);
     }
 
     private void CheckPath()
@@ -84,7 +97,7 @@ public class AgentPatrol : MonoBehaviour
 
             if (!loopPath && (targetIndex >= path.Count - 1 || targetIndex <= 0))
             {
-                step *= -1;
+                step = targetIndex == 0 ? 1 : -1;
             }
             targetIndex = (targetIndex + step) % path.Count;
         }

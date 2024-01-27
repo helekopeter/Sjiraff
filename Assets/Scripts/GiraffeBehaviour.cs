@@ -6,15 +6,27 @@ using UnityEngine.Events;
 
 public class GiraffeBehaviour : MonoBehaviour
 {
-    public UnityAction<bool> isBad;
+    [SerializeField] private LayerMask taserLayer;
+    
+    public UnityAction IsBad;
+    public UnityAction Tased;
 
     [SerializeField] private bool bad;
 
     private void OnValidate()
     {
-        if (Application.isPlaying)
+        
+        if (Application.isPlaying && bad)
         {
-            isBad?.Invoke(bad);
+            IsBad?.Invoke();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (((1 << gameObject.layer) & taserLayer.value) != 0)
+        {
+            Tased?.Invoke();
         }
     }
 }
