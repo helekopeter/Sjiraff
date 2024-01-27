@@ -32,8 +32,8 @@ public class RandomPath : MonoBehaviour
     private float defaultAcc;
     
     private float stopTimestamp = 0;
-    private float currentStopTime = -1;
-    
+    private float currentStopTime = -1; 
+
     private void OnValidate()
     {
         if (agent == null)
@@ -68,6 +68,7 @@ public class RandomPath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
         {
             agent.enabled = true;
@@ -103,7 +104,7 @@ public class RandomPath : MonoBehaviour
             agent.enabled = true;
             ob.enabled = false;
             currentStopTime = -1;
-
+            
             agent.SetDestination(GetRunPos());
         }
     }
