@@ -24,7 +24,9 @@ public class GiraffeBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (((1 << gameObject.layer) & taserLayer.value) != 0)
+        //Debug.Log(other.transform.parent.name + " " + other.name);
+        
+        if (((1 << other.gameObject.layer) & taserLayer.value) != 0)
         {
             Tased?.Invoke();
         }

@@ -17,6 +17,9 @@ public class AgentPatrol : MonoBehaviour
 
     [SerializeField] private GameObject taser;
     [SerializeField] private GiraffeBehaviour giraffe;
+    
+    public float SqrDisToGiraffe => (transform.position - giraffe.transform.position).sqrMagnitude;
+    public bool Chasing => chaseGiraffe;
     private bool chaseGiraffe = false;
     
     private int targetIndex = 0;
