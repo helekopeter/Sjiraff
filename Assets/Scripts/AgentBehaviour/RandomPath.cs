@@ -19,11 +19,18 @@ public class RandomPath : MonoBehaviour
     [SerializeField] private float minStopTime = 1;
     [SerializeField] private float maxStopTime = 5;
     [SerializeField] private float targetDistance = 0.25f;
-
+    
     [SerializeField] private List<Transform> POI;
     [SerializeField] private float POIchance = 0.1f;
 
-    [Space(10)] [SerializeField] private NavMeshPathStatus status;
+    [SerializeField] private GiraffeBehaviour giraffe;
+
+    [SerializeField] private bool scared;
+    [SerializeField] private float runMult = 2;
+    [SerializeField] private float scaredDistance;
+
+    private float defaultSpeed;
+    private float defaultAcc;
     
     private float stopTimestamp = 0;
     private float currentStopTime = -1;
@@ -39,40 +46,86 @@ public class RandomPath : MonoBehaviour
             ob = GetComponent<NavMeshObstacle>();
         }
     }
+
+    private void OnEnable()
+    {
+        giraffe.isBad += RunAway;
+    }
+
+    private void OnDisable()
+    {
+        giraffe.isBad -= RunAway;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        defaultSpeed = agent.speed;
+        defaultAcc = agent.acceleration;
         agent.SetDestination(GetNewTarget());
     }
+    
 
     // Update is called once per frame
     void Update()
     {
-        status = agent.pathStatus;
-        if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
+        if (!scared)
         {
-            agent.enabled = true;
-            ob.enabled = false;
-            //Debug.Log("new target");
-            agent.SetDestination(GetNewTarget());
-            currentStopTime = -1;
-            return;
-        }
+            if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
+            {
+                agent.enabled = true;
+                ob.enabled = false;
+                //Debug.Log("new target");
+                agent.SetDestination(GetNewTarget());
+                currentStopTime = -1;
+                return;
+            }
 
-        if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
-        {
-            //Debug.Log("new timestamp");
-            stopTimestamp = Time.time;
-            currentStopTime = Random.Range(minStopTime, maxStopTime);
+            if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
+            {
+                //Debug.Log("new timestamp");
+                stopTimestamp = Time.time;
+                currentStopTime = Random.Range(minStopTime, maxStopTime);
 
-            agent.enabled = false;
-            ob.enabled = true;
+                agent.enabled = false;
+                ob.enabled = true;
+            }
         }
     }
-    
-    
 
-    Vector3 GetNewTarget()
+    private void RunAway(bool state)
+    {
+        if (state && (transform.position - giraffe.transform.position).sqrMagnitude < scaredDistance * scaredDistance)
+        {
+            scared = state;
+            
+            agent.speed = defaultSpeed * runMult;
+            agent.acceleration = defaultAcc * runMult;
+            
+            agent.enabled = true;
+            ob.enabled = false;
+            currentStopTime = -1;
+
+            agent.SetDestination(GetRunPos());
+        }
+        else if (scared)
+        {
+            scared = state;
+            
+            agent.speed = defaultSpeed;
+            agent.acceleration = defaultAcc;
+            
+            agent.SetDestination(GetNewTarget());
+        }
+    }
+
+    private Vector3 GetRunPos()
+    {
+        var dir = (transform.position - giraffe.transform.position).normalized;
+        return ClampPosition(transform.position + dir * scaredDistance * 1.2f);
+    }
+
+    private Vector3 GetNewTarget()
     {
         if (Random.value < POIchance && POI.Count > 0)
         {
@@ -82,11 +135,14 @@ public class RandomPath : MonoBehaviour
         float angle = Random.Range(0, 2 * Mathf.PI);
         Vector3 dPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
         dPos *= Random.Range(minWalkDistance, maxWalkDistance);
-        Vector3 pos = transform.position + dPos;
 
+        return ClampPosition(transform.position + dPos);
+    }
+
+    private Vector3 ClampPosition(Vector3 pos)
+    {
         pos.x = Mathf.Clamp(pos.x, minBounds.position.x, maxBounds.position.x);
         pos.z = Mathf.Clamp(pos.z, minBounds.position.z, maxBounds.position.z);
-
         return pos;
     }
 
