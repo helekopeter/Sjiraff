@@ -25,7 +25,6 @@ public class RandomPath : MonoBehaviour
 
     [SerializeField] private GiraffeBehaviour giraffe;
 
-    [SerializeField] private bool scared;
     [SerializeField] private float runMult = 2;
     [SerializeField] private float scaredDistance;
 
@@ -49,12 +48,12 @@ public class RandomPath : MonoBehaviour
 
     private void OnEnable()
     {
-        giraffe.isBad += RunAway;
+        giraffe.IsBad += RunAway;
     }
 
     private void OnDisable()
     {
-        giraffe.isBad -= RunAway;
+        giraffe.IsBad -= RunAway;
     }
 
     // Start is called before the first frame update
@@ -69,36 +68,35 @@ public class RandomPath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!scared)
+        if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
         {
-            if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
-            {
-                agent.enabled = true;
-                ob.enabled = false;
-                //Debug.Log("new target");
-                agent.SetDestination(GetNewTarget());
-                currentStopTime = -1;
-                return;
-            }
+            agent.enabled = true;
+            ob.enabled = false;
+            agent.SetDestination(GetNewTarget());
+            currentStopTime = -1;
+            return;
+        }
 
-            if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
-            {
-                //Debug.Log("new timestamp");
-                stopTimestamp = Time.time;
-                currentStopTime = Random.Range(minStopTime, maxStopTime);
+        if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
+        {
+            stopTimestamp = Time.time;
+            currentStopTime = Random.Range(minStopTime, maxStopTime);
 
-                agent.enabled = false;
-                ob.enabled = true;
+            agent.enabled = false;
+            ob.enabled = true;
+
+            if (agent.speed > defaultSpeed)
+            {
+                agent.speed = defaultSpeed;
+                agent.acceleration = defaultAcc;
             }
         }
     }
 
-    private void RunAway(bool state)
+    private void RunAway()
     {
-        if (state && (transform.position - giraffe.transform.position).sqrMagnitude < scaredDistance * scaredDistance)
+        if ((transform.position - giraffe.transform.position).sqrMagnitude < scaredDistance * scaredDistance)
         {
-            scared = state;
-            
             agent.speed = defaultSpeed * runMult;
             agent.acceleration = defaultAcc * runMult;
             
@@ -107,15 +105,6 @@ public class RandomPath : MonoBehaviour
             currentStopTime = -1;
 
             agent.SetDestination(GetRunPos());
-        }
-        else if (scared)
-        {
-            scared = state;
-            
-            agent.speed = defaultSpeed;
-            agent.acceleration = defaultAcc;
-            
-            agent.SetDestination(GetNewTarget());
         }
     }
 
