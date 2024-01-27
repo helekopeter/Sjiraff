@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - PickUp
+  - Grass
+  - Stone
   layers:
   - Default
   - TransparentFX
