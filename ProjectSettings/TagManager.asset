@@ -7,6 +7,7 @@ TagManager:
   - PickUp
   - Grass
   - Stone
+  - Bullet
   layers:
   - Default
   - TransparentFX
