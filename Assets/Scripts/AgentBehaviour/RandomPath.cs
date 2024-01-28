@@ -10,6 +10,7 @@ public class RandomPath : MonoBehaviour
 {
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private NavMeshObstacle ob;
+    [SerializeField] private npcAudio audio;
 
     [SerializeField] private Transform maxBounds;
     [SerializeField] private Transform minBounds;
@@ -47,6 +48,11 @@ public class RandomPath : MonoBehaviour
         if (ob == null)
         {
             ob = GetComponent<NavMeshObstacle>();
+        }
+
+        if (audio == null)
+        {
+            audio = GetComponent<npcAudio>();
         }
     }
 
@@ -115,6 +121,7 @@ public class RandomPath : MonoBehaviour
             scaredStart = Time.time;
             
             agent.SetDestination(GetRunPos());
+            audio?.PlayRunSound();
         }
     }
 

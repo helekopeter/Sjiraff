@@ -6,6 +6,7 @@ using UnityEngine.LowLevelPhysics;
 
 public class RagdolSwitch : MonoBehaviour
 {
+    [SerializeField] private npcAudio audio;
     [SerializeField] private OnTriggerForwarder launchTrigger;
     [SerializeField] private Rigidbody[] rbs;
     //[SerializeField] private CharacterJoint[] joints;
@@ -19,6 +20,7 @@ public class RagdolSwitch : MonoBehaviour
     {
         if (updateLists)
         {
+            audio = GetComponent<npcAudio>();
             launchTrigger = GetComponentInChildren<OnTriggerForwarder>();
             rbs = GetComponentsInChildren<Rigidbody>();
             //joints = GetComponentsInChildren<CharacterJoint>();
@@ -62,8 +64,15 @@ public class RagdolSwitch : MonoBehaviour
         
         //Debug.Log("Trigger");
         var gb = other.GetComponentInParent<GiraffeBehaviour>();
-        if (gb != null)
+        if (gb != null || other.CompareTag("PickUp"))
         {
+            if (gb == null)
+            {
+                //ik it's bad, it's last minute don't @ me
+                gb = FindFirstObjectByType<GiraffeBehaviour>();
+            }
+            
+            audio?.PlayLaunchSound();
             gb.IsBad?.Invoke();
 
             var dir = transform.position - other.transform.position;
