@@ -13,6 +13,7 @@ public class RagdolSwitch : MonoBehaviour
     [SerializeField] private bool updateLists = false;
     [SerializeField] private float launchUpAmount = 1;
     [SerializeField] private float launchVelocity = 2;
+    [SerializeField] private float minVelForLaunch = 3;
     
 
     [SerializeField] private Behaviour[] componentsToDisable;
@@ -57,14 +58,16 @@ public class RagdolSwitch : MonoBehaviour
 
     private void DoLaunch(Collider other)
     {
-        if (!componentsToDisable[0].enabled)
+        if (!componentsToDisable[0].enabled || other.isTrigger)
         {
             return;
         }
         
         //Debug.Log("Trigger");
         var gb = other.GetComponentInParent<GiraffeBehaviour>();
-        if (gb != null || (other.CompareTag("PickUp") && other.gameObject.layer == 7) || other.CompareTag("Bullet"))
+        var oRb = other.GetComponentInChildren<Rigidbody>();
+        
+        if ((gb != null || (other.CompareTag("PickUp") && other.gameObject.layer == 7) || other.CompareTag("Bullet")) && oRb.velocity.sqrMagnitude > minVelForLaunch * minVelForLaunch)
         {
             if (gb == null)
             {
