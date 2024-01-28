@@ -27,13 +27,17 @@ public class RandomPath : MonoBehaviour
 
     [SerializeField] private float runMult = 2;
     [SerializeField] private float scaredDistance;
+    [SerializeField] private float scaredTime = 5;
 
     private float defaultSpeed;
     private float defaultAcc;
     
     private float stopTimestamp = 0;
     private float currentStopTime = -1;
+
+    private float scaredStart = -5;
     
+
     private void OnValidate()
     {
         if (agent == null)
@@ -68,27 +72,30 @@ public class RandomPath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
+        if (Time.time - scaredStart > scaredTime)
         {
-            agent.enabled = true;
-            ob.enabled = false;
-            agent.SetDestination(GetNewTarget());
-            currentStopTime = -1;
-            return;
-        }
-
-        if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
-        {
-            stopTimestamp = Time.time;
-            currentStopTime = Random.Range(minStopTime, maxStopTime);
-
-            agent.enabled = false;
-            ob.enabled = true;
-
-            if (agent.speed > defaultSpeed)
+            if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
             {
-                agent.speed = defaultSpeed;
-                agent.acceleration = defaultAcc;
+                agent.enabled = true;
+                ob.enabled = false;
+                agent.SetDestination(GetNewTarget());
+                currentStopTime = -1;
+                return;
+            }
+
+            if (currentStopTime < 0 && agent.remainingDistance < targetDistance)
+            {
+                stopTimestamp = Time.time;
+                currentStopTime = Random.Range(minStopTime, maxStopTime);
+
+                agent.enabled = false;
+                ob.enabled = true;
+
+                if (agent.speed > defaultSpeed)
+                {
+                    agent.speed = defaultSpeed;
+                    agent.acceleration = defaultAcc;
+                }
             }
         }
     }
@@ -97,6 +104,7 @@ public class RandomPath : MonoBehaviour
     {
         if ((transform.position - giraffe.transform.position).sqrMagnitude < scaredDistance * scaredDistance)
         {
+            //Debug.Log("help");
             agent.speed = defaultSpeed * runMult;
             agent.acceleration = defaultAcc * runMult;
             
@@ -104,6 +112,8 @@ public class RandomPath : MonoBehaviour
             ob.enabled = false;
             currentStopTime = -1;
 
+            scaredStart = Time.time;
+            
             agent.SetDestination(GetRunPos());
         }
     }
