@@ -64,7 +64,7 @@ public class RagdolSwitch : MonoBehaviour
         
         //Debug.Log("Trigger");
         var gb = other.GetComponentInParent<GiraffeBehaviour>();
-        if (gb != null || other.CompareTag("PickUp"))
+        if (gb != null || (other.CompareTag("PickUp") && other.gameObject.layer == 7))
         {
             if (gb == null)
             {
