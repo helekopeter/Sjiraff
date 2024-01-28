@@ -12,7 +12,7 @@ public class OnTriggerForwarder : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("enter");
+        //Debug.Log("enter");
         Enter?.Invoke(other);
     }
 

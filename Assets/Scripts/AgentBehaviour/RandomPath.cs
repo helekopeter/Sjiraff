@@ -68,7 +68,6 @@ public class RandomPath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         if (currentStopTime > 0 && Time.time - stopTimestamp > currentStopTime)
         {
             agent.enabled = true;
